@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const session = require('express-session');
+const session = require('express-session')
+const MemoryStore = require('memorystore')(session)
 const bcrypt = require('bcrypt');
 const path = require('path');
 const User = require('./models/User');
@@ -25,10 +26,13 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: 'secretKey',
-  resave: true,
-  saveUninitialized: true
-}));
+  cookie: { maxAge: 86400000 },
+  store: new MemoryStore({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
+  resave: false,
+  secret: 'keyboard cat'
+}))
 
 // View engine setup
 app.set('view engine', 'ejs');
@@ -48,6 +52,15 @@ let islogedIn = (req,res,next)=>{
    next();
   }
 }
+
+let islogedout = (req, res, next) => {
+  if (!req.session.user) {
+    res.redirect('/login'); 
+  } else {
+    next(); 
+  }
+}
+
 // Route to render login.ejs
 app.get('/login', islogedIn,(req, res) => {
   res.render('login', { user: req.session.user });
@@ -56,6 +69,20 @@ app.get('/login', islogedIn,(req, res) => {
 app.get('/signup', (req, res) => {
   res.render('signup', { user: req.session.user });
 });
+
+
+// Route to render contribute.ejs
+app.get('/contribute',islogedout, (req, res) => {
+  res.render('contribute', { user: req.session.user });
+});
+
+// Define route handler for POST /contribute
+app.post('/contribute', (req, res) => {
+  // Handle the POST request here
+  // For example, you can process form data, save it to the database, etc.
+  return res.send('<script>alert("Contribution received successfully!"); window.location.href = "/";</script>');
+});
+
 
 // Route to render engineering.ejs
 app.get('/engineering', (req, res) => {
@@ -192,6 +219,9 @@ app.get('/edit-profile', (req, res) => {
       res.redirect('/login');
   }
 });
+
+
+
 
 // Route to handle editing the user's profile
 app.post('/edit-profile', async (req, res) => {
