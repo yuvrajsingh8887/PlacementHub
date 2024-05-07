@@ -1,0 +1,59 @@
+<!-- contribute.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute</title>
+    <link rel="stylesheet" href="contribute.css">
+</head>
+
+<body>
+
+ <%- include("partials/nav") -%>
+
+    <div class="container">
+        <h1>Contribute</h1>
+        <% if (!user) { %>
+            <!-- Add a hidden input field to store user login status -->
+            <input type="hidden" id="loggedIn" value="false">
+        <% } else { %>
+            <input type="hidden" id="loggedIn" value="true">
+        <% } %>
+        <form id="contributeForm" action="/contribute" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" required>
+            </div>
+            <div class="form-group">
+                <label for="topic">Topic:</label>
+                <input type="text" id="topic" name="topic" required>
+            </div>
+            <div class="form-group">
+                <label for="pdfFile">Upload PDF File:</label>
+                <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required>
+            </div>
+            <button type="button" id="submitButton">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        // Add event listener to the submit button
+        document.getElementById('submitButton').addEventListener('click', function() {
+            // Check if the user is logged in
+            var isLoggedIn = document.getElementById('loggedIn').value;
+            console.log("User logged in status:", isLoggedIn); // Debugging
+            if (isLoggedIn === 'false') {
+                // Display alert message if user is not logged in
+                alert("You have to login first!");
+            } else {
+                // If user is logged in, submit the form
+                document.getElementById('contributeForm').submit();
+            }
+        });
+    </script>
+</body>
+
+</html>
